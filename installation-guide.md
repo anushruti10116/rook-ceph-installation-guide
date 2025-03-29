@@ -23,20 +23,20 @@ colima start
 ```
 ### Install and start minikube
 
-Minikube is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes.
+- Minikube is local Kubernetes, focusing on making it easy to learn and develop for Kubernetes.
 
 ```
 brew install minikube
 minikube start --disk-size=20g --driver docker
 ```
-Install kubectl on your host machine 
+- Install kubectl on your host machine 
 
 ```
 curl -LO "https://dl.k8s.io/release/v1.26.1/bin/darwin/arm64/kubectl"
 chmod +x kubectl
 sudo mv kubectl /usr/local/bin/
 ```
-As with docker on M1 mac, we can not attach /dev/sd* or /dev/vd* devices as it is ARM based and Ceph does not use /dev/loop devices which are available in minikube with docker driver. That's why we will be using network block device /dev/nbd0
+- As with docker on M1 mac, we can not attach /dev/sd* or /dev/vd* devices as it is ARM based and Ceph does not use /dev/loop devices which are available in minikube with docker driver. That's why we will be using network block device /dev/nbd0
 ```
 minikube ssh
 sudo mkdir /mnt/disks
@@ -50,33 +50,33 @@ sudo apt-get install qemu-utils
 # To bind nbd device to the file 
 sudo qemu-nbd --format raw -c /dev/nbd0 /mnt/disks/mydisk.img
 ```
-Note: Please check there is no necessary data in /dev/nbd0, otherwise please take backup.
+- Note: Please check there is no necessary data in /dev/nbd0, otherwise please take backup.
 ```
 sudo wipefs -a /dev/nbd0
 ```
-Verify the size of nbd device using lsblk
+- Verify the size of nbd device using lsblk
 ```
  lsblk | grep nbd0
 ```
-Clone rook repository on your host machine.
+- Clone rook repository on your host machine.
 
 ```
 git clone https://github.com/rook/rook.git
 ```
-Change into rook/deploy/examples/ directory
+- Change into rook/deploy/examples/ directory
 
 ```
 cd rook/deploy/examples/
 ```
-Deploy rook operator
+- Deploy rook operator
 ```
 kubectl create -f crds.yaml -f common.yaml -f operator.yaml
 ```
-Verify the rook-ceph-operator is in running state before proceeding
+- Verify the rook-ceph-operator is in running state before proceeding
 ```
 kubectl get pods -n rook-ceph
 ```
-In cluster-test.yaml, make necessary changes to storage section with the device selection:
+- In cluster-test.yaml, make necessary changes to storage section with the device selection:
 ```
   storage:
     useAllNodes: false
@@ -88,11 +88,11 @@ In cluster-test.yaml, make necessary changes to storage section with the device 
     allowDeviceClassUpdate: true
     allowOsdCrushWeightUpdate: false
 ```
-Create ceph cluster
+- Create ceph cluster
 ```
 kubectl create -f cluster-test.yaml
 ```
-Verify the cluster is running by checking pods status in rook-ceph namespace
+- Verify the cluster is running by checking pods status in rook-ceph namespace
 ```
 kubectl -n rook-ceph get pod
 NAME                                           READY   STATUS      RESTARTS        AGE
@@ -108,29 +108,29 @@ rook-ceph-osd-0-57bb7f4f89-92xbw               1/1     Running     0            
 rook-ceph-osd-prepare-minikube-m7vxx           0/1     Completed   0               46s
 ```
 
-If the rook-ceph-mon, rook-ceph-mgr, or rook-ceph-osd pods are not created, please refer to the Ceph common issues for more details and potential solutions.
+- If the rook-ceph-mon, rook-ceph-mgr, or rook-ceph-osd pods are not created, please refer to the Ceph common issues for more details and potential solutions.
 
-To verify that the cluster is in a healthy state, connect to the Rook Toolbox.
+- To verify that the cluster is in a healthy state, connect to the Rook Toolbox.
 ```
 kubectl create -f toolbox.yaml
 ```
-Wait for the toolbox pod to download its container and get to the running state:
+- Wait for the toolbox pod to download its container and get to the running state:
 ```
 kubectl -n rook-ceph rollout status deploy/rook-ceph-tools
 ```
-Once the rook-ceph-tools pod is running, you can connect to it with:
+- Once the rook-ceph-tools pod is running, you can connect to it with:
 ```
 kubectl -n rook-ceph exec -it deploy/rook-ceph-tools -- bash
 ```
-Run the ceph status command and check
+- Run the ceph status command and check
 
-All mons should be in quorum
+   - All mons should be in quorum
 
-A mgr should be active
+   - A mgr should be active
 
-At least 1 OSDs should be up and in
+   - At least 1 OSDs should be up and in
 
-If the health is not HEALTH_OK, the warnings or errors should be investigated
+   - If the health is not HEALTH_OK, the warnings or errors should be investigated
 ```
 bash-5.1$ ceph -s
   cluster:
@@ -148,7 +148,7 @@ bash-5.1$ ceph -s
     usage:   27 MiB used, 10 GiB / 10 GiB avail
     pgs:     1 active+clean
 ```
-If the cluster is not healthy, please refer to the https://rook.io/docs/rook/latest/Troubleshooting/ceph-common-issues/ for potential solutions.
+- If the cluster is not healthy, please refer to the https://rook.io/docs/rook/latest/Troubleshooting/ceph-common-issues/ for potential solutions.
 
 References:
 
